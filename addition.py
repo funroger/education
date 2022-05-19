@@ -34,7 +34,7 @@ def main() -> None:
 
         if user_string.isnumeric():
            answer = int(user_string)
-           if (left + right) == answer:
+           if correct_answer == answer:
                playSound("media/correct.wav")
                print(format.LIGHT_GREEN + "correct" + format.NC)
                continue
