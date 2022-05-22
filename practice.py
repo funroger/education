@@ -30,10 +30,52 @@ def parse_arguments():
     return ctx
 
 
+__media_threads = []
+
+
 def play_sound(path: str) -> None:
-    thread = threading.Thread(target=playsound.playsound, args=(path,),
-        daemon=True)
+    thread = threading.Thread(target=playsound.playsound, args=(path,))
     thread.start()
+    __media_threads.append(thread)
+
+
+def run_practice(module, tasks: list) -> list:
+    wrong_tasks = []
+    taskIdx = 0
+    while True:
+        # get task and task number
+        if len(tasks):
+            if taskIdx >= len(tasks):
+                break
+            taskNum, task = tasks[taskIdx]
+        else:
+            taskNum = taskIdx + 1
+            task = module.get_task()
+
+        # get user input
+        while True:
+            print("#" + str(taskNum) + ": " + task.Desc(), end = '')
+            user_answer = input()
+            if user_answer:
+                break
+            print(format.YELLOW + "Do you want to quit?" + format.NC + " [y/n] ")
+            user_answer = input()
+            if user_answer == "y":
+                return wrong_tasks
+
+        # check results
+        correct = module.check_task(task, user_answer)
+        if correct:
+            play_sound("media/correct.wav")
+            print(format.GREEN + "correct" + format.NC)
+        else:
+            play_sound("media/wrong.wav")
+            print(format.RED + "NOT QUITE CORRECT" + format.NC)
+            wrong_tasks.append((taskNum, task))
+
+        taskIdx += 1
+
+    return wrong_tasks
 
 
 def main() -> None:
@@ -53,25 +95,21 @@ def main() -> None:
     module.initialize()
 
     # start practicing
-    taskIdx = 0
+    wrong_tasks = []
     while True:
-        taskIdx += 1
+        wrong_tasks = run_practice(module, wrong_tasks)
 
-        task = module.get_task()
+        if not wrong_tasks:
+            break
 
-        print("#" + str(taskIdx) + ": " + task.Desc(), end = '')
+        print(format.YELLOW + "Some answers were not quite correct." + 
+            format.NC + " Do you want to correct them? [y/n] ", end = '')
         user_answer = input()
-        if not user_answer:
-            return
+        if not user_answer == "y":
+            break
 
-        correct = module.check_task(task, user_answer)
-
-        if correct:
-            play_sound("media/correct.wav")
-            print(format.LIGHT_GREEN + "correct" + format.NC)
-        else:
-            play_sound("media/wrong.wav")
-            print(format.RED + "NOT QUITE CORRECT." + format.NC)
+    for thread in __media_threads:
+        thread.join()
 
 
 main()

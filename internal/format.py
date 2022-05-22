@@ -4,7 +4,8 @@ NC = "\033[0m"  # No Color
 
 GREEN = "\033[0;32m"
 RED = "\033[0;31m"
-WHITE = "\033[1;97m"
+YELLOW = "\033[0;33m" 
+WHITE = "\033[0;37m"
 
 LIGHT_GREEN = "\033[1;92m"
 LIGHT_RED = "\033[1;91m"
